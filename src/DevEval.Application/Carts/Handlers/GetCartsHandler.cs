@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Carts.Dtos;
 using DevEval.Application.Carts.Queries;
 using DevEval.Common.Helpers.Pagination;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Carts.Handlers
     public class GetCartsHandler : IRequestHandler<GetCartsQuery, Result<PaginatedResult<CartDto>>>
     {
         private readonly ICartRepository _repository;
-        private readonly IMapper _mapper;
 
-        public GetCartsHandler(ICartRepository repository, IMapper mapper)
+        public GetCartsHandler(ICartRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<PaginatedResult<CartDto>>> Handle(GetCartsQuery request, CancellationToken cancellationToken)
@@ -25,7 +23,7 @@ namespace DevEval.Application.Carts.Handlers
 
             return Result.Ok(new PaginatedResult<CartDto>
             {
-                Items = _mapper.Map<List<CartDto>>(result.Items),
+                Items = result.Items.Select(cart => cart.ToDto()).ToList(),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages

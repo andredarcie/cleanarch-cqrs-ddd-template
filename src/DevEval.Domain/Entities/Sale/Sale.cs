@@ -125,6 +125,46 @@
             }
         }
 
+        public void UpdateSaleNumber(string saleNumber)
+        {
+            if (string.IsNullOrWhiteSpace(saleNumber))
+                throw new ArgumentException("Sale number cannot be null or empty.", nameof(saleNumber));
+
+            SaleNumber = saleNumber;
+        }
+
+        public void UpdateSaleDate(DateTime saleDate)
+        {
+            if (saleDate == default)
+                throw new ArgumentException("Sale date must be a valid value.", nameof(saleDate));
+
+            SaleDate = saleDate;
+        }
+
+        public void UpdateCustomer(Guid customerId, string customerName)
+        {
+            if (customerId == Guid.Empty)
+                throw new ArgumentException("Customer ID must be a valid GUID.", nameof(customerId));
+
+            if (string.IsNullOrWhiteSpace(customerName))
+                throw new ArgumentException("Customer name cannot be null or empty.", nameof(customerName));
+
+            CustomerId = customerId;
+            CustomerName = customerName;
+        }
+
+        public void UpdateBranch(Guid branchId, string branchName)
+        {
+            if (branchId == Guid.Empty)
+                throw new ArgumentException("Branch ID must be a valid GUID.", nameof(branchId));
+
+            if (string.IsNullOrWhiteSpace(branchName))
+                throw new ArgumentException("Branch name cannot be null or empty.", nameof(branchName));
+
+            BranchId = branchId;
+            BranchName = branchName;
+        }
+
         /// <summary>
         /// Creates a new sale from a shopping cart.
         /// </summary>

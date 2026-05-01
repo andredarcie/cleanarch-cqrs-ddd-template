@@ -92,10 +92,11 @@ You have completed the **basic application flow**. Now, feel free to explore the
 
 The project includes a variety of automated tests to ensure the quality, reliability, and correctness of the application. The tests cover multiple layers of the system, including:
 
-- *Application Layer*: Tests for handlers and AutoMapper profiles to verify the proper functioning of commands, queries, and mapping configurations.
+- *Application Layer*: Tests for handlers to verify the proper functioning of commands, queries, and manual mappings.
 - *Domain Layer*: Focuses on business logic validation for entities and value objects, ensuring domain rules are implemented correctly.
 - *Entity Tests*: Validates the behavior of core domain entities such as carts, products, and sales.
 - *Value Object Tests*: Ensures immutability and correctness of value objects like addresses, ratings, and geolocations.
+- *Integration Tests*: Validates the real API pipeline with PostgreSQL and authentication.
 
 To ensure the application works as expected, you can run the automated tests. Follow these steps:
 
@@ -104,6 +105,16 @@ Run the tests from the project root:
 ```console
 dotnet test test/DevEval.Test
 ```
+
+Run the integration tests from the project root:
+
+```console
+dotnet test test/DevEval.IntegrationTests/DevEval.IntegrationTests.csproj
+```
+
+Integration test documentation:
+
+- [test/DevEval.IntegrationTests/README.md](C:\repos\cleanarch-cqrs-ddd-template\test\DevEval.IntegrationTests\README.md)
 
 ### ✅ Done!
 
@@ -119,7 +130,7 @@ The project follows a modular approach inspired by **Domain-Driven Design (DDD)*
   - **Commands**: Represent intent and encapsulate all data required to execute specific operations (e.g., `LoginUserCommand`, `CreateCartCommand`, `ConvertCartToSaleCommand`).
   - **Handlers**: Execute business logic by interacting with the domain layer (e.g., `LoginUserHandler`, `CancelSaleItemHandler`).
   - **DTOs (Data Transfer Objects)**: Used to transfer data between layers and external clients (e.g., `CartDto`, `ProductDto`, `SaleDto`, `UserDto`).
-  - **Profiles**: AutoMapper profiles to map domain models to DTOs, maintaining separation of concerns.
+  - **Mappings**: Manual mapping helpers for converting commands, entities, and DTOs while keeping transformation rules explicit.
 
 - **src/DevEval.Domain**  
   Represents the core of the application, focusing on business rules and domain logic. Implements core DDD patterns:
@@ -153,10 +164,15 @@ The project follows a modular approach inspired by **Domain-Driven Design (DDD)*
 - **test/DevEval.Test**  
   Implements automated tests to ensure application quality and robustness:
   - **Handlers**: Tests for application handlers to validate business logic (e.g., `LoginUserHandlerTests`, `CancelSaleItemHandlerTests`).
-  - **Profiles**: Tests for AutoMapper mappings (e.g., `CartProfileTests`, `ProductProfileTests`).
   - **Entities**: Tests for domain entities to verify business rules (e.g., `CartTests`, `ProductTests`, `SaleTests`).
   - **Value Objects**: Tests for value objects to ensure immutability and validity (e.g., `AddressTests`).
   - **Project Configuration**: `DevEval.Test.csproj` consolidates all test files and dependencies.
+
+- **test/DevEval.IntegrationTests**  
+  Implements integration tests for the real API pipeline:
+  - **Infrastructure**: Bootstraps the API host, temporary PostgreSQL container, reset, and authentication seed.
+  - **Scenarios**: Organizes end-to-end tests by API resource and flow.
+  - **Project Documentation**: See [test/DevEval.IntegrationTests/README.md](C:\repos\cleanarch-cqrs-ddd-template\test\DevEval.IntegrationTests\README.md).
 
 ---
 
@@ -190,7 +206,7 @@ The project follows a modular approach inspired by **Domain-Driven Design (DDD)*
 ### 🛠️ Usage of Technologies
 
 ### Backend
-- **.NET 8.0**: Core framework for building RESTful APIs and executing business logic across all layers.
+- **.NET 10.0**: Core framework for building RESTful APIs and executing business logic across all layers.
 - **C#**: Primary programming language for implementing application logic.
 
 ### Frameworks
@@ -198,8 +214,8 @@ The project follows a modular approach inspired by **Domain-Driven Design (DDD)*
   - Centralizes request handling by decoupling controllers and domain logic.  
   - Example: `LoginUserCommand` is sent by `AuthController` and processed by `LoginUserHandler`.
 
-- **Automapper**:  
-  - Maps `Cart` domain entities to `CartDto` in handlers and controllers to ensure API responses are formatted for external clients.
+- **Manual Mapping**:  
+  - Converts commands, entities, and DTOs explicitly in the application layer, keeping transformation rules visible and testable.
 
 - **Rebus**:  
   - A lean service bus implementation for .NET. Used to implement event-driven design for publishing events like `SaleCreated`, `SaleModified`, `SaleCancelled`, and `ItemCancelled`.  

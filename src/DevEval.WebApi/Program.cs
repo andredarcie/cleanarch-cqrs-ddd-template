@@ -37,7 +37,6 @@ namespace DevEval.WebApi
             ConfigureSwagger(builder);
             ConfigureDatabase(builder);
             ConfigureDependencyInjection(builder);
-            ConfigureAutoMapper(builder);
             ConfigureFluentValidation(builder);
             ConfigureRouting(builder);
             ConfigureMediatR(builder);
@@ -88,11 +87,6 @@ namespace DevEval.WebApi
         private static void ConfigureDependencyInjection(WebApplicationBuilder builder)
         {
             builder.Services.RegisterServices();
-        }
-
-        private static void ConfigureAutoMapper(WebApplicationBuilder builder)
-        {
-            builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(ApplicationLayer).Assembly);
         }
 
         private static void ConfigureFluentValidation(WebApplicationBuilder builder)
@@ -205,6 +199,7 @@ namespace DevEval.WebApi
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

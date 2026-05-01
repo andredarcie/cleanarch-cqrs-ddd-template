@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevEval.WebApi", "src\DevEv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevEval.Test", "test\DevEval.Test\DevEval.Test.csproj", "{CF5D7394-75AF-41BF-93AE-D783CBB795C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevEval.IntegrationTests", "test\DevEval.IntegrationTests\DevEval.IntegrationTests.csproj", "{9CDC5302-C934-4664-A16B-1E8DD0C13207}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{CF5D7394-75AF-41BF-93AE-D783CBB795C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF5D7394-75AF-41BF-93AE-D783CBB795C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF5D7394-75AF-41BF-93AE-D783CBB795C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CDC5302-C934-4664-A16B-1E8DD0C13207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CDC5302-C934-4664-A16B-1E8DD0C13207}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CDC5302-C934-4664-A16B-1E8DD0C13207}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CDC5302-C934-4664-A16B-1E8DD0C13207}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +73,6 @@ Global
 		{4E19314E-2E80-4BEA-9D52-FB7324039BC6} = {3C8386B9-64AB-4E0C-89AB-11E71A0E8CF4}
 		{83F45F17-A9AB-442F-86A6-78C08C6B190E} = {3C8386B9-64AB-4E0C-89AB-11E71A0E8CF4}
 		{CF5D7394-75AF-41BF-93AE-D783CBB795C1} = {95528D9F-1BF8-4537-90E7-251EF8657AF2}
+		{9CDC5302-C934-4664-A16B-1E8DD0C13207} = {95528D9F-1BF8-4537-90E7-251EF8657AF2}
 	EndGlobalSection
 EndGlobal

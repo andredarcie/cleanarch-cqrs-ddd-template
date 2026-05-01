@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Common.Errors;
 using DevEval.Application.Sales.Dtos;
 using DevEval.Application.Sales.Queries;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Sales.Handlers
     public class GetSaleByIdHandler : IRequestHandler<GetSaleByIdQuery, Result<SaleDto>>
     {
         private readonly ISaleRepository _repository;
-        private readonly IMapper _mapper;
 
-        public GetSaleByIdHandler(ISaleRepository repository, IMapper mapper)
+        public GetSaleByIdHandler(ISaleRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<SaleDto>> Handle(GetSaleByIdQuery request, CancellationToken cancellationToken)
@@ -26,7 +24,7 @@ namespace DevEval.Application.Sales.Handlers
             if (sale == null)
                 return Result.Fail(new NotFoundError($"Sale with ID {request.Id} not found."));
 
-            return Result.Ok(_mapper.Map<SaleDto>(sale));
+            return Result.Ok(sale.ToDto());
         }
     }
 }

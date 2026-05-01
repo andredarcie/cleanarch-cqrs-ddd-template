@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Common.Errors;
 using DevEval.Application.Products.Commands;
 using DevEval.Application.Products.Dtos;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Products.Handlers
     public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result<ProductDto>>
     {
         private readonly IProductRepository _repository;
-        private readonly IMapper _mapper;
 
-        public UpdateProductHandler(IProductRepository repository, IMapper mapper)
+        public UpdateProductHandler(IProductRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<ProductDto>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -26,11 +24,11 @@ namespace DevEval.Application.Products.Handlers
             if (existingProduct == null)
                 return Result.Fail(new NotFoundError($"Product with ID {request.Id} not found."));
 
-            _mapper.Map(request, existingProduct);
+            request.ApplyTo(existingProduct);
 
             var updatedProduct = await _repository.UpdateAsync(existingProduct);
 
-            return Result.Ok(_mapper.Map<ProductDto>(updatedProduct));
+            return Result.Ok(updatedProduct.ToDto());
         }
     }
 }

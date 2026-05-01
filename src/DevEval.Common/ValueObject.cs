@@ -2,25 +2,25 @@
 {
     public abstract class ValueObject
     {
-        protected static bool EqualOperator(ValueObject left, ValueObject right)
+        protected static bool EqualOperator(ValueObject? left, ValueObject? right)
         {
             if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
             {
                 return false;
             }
-            return ReferenceEquals(left, right) || left.Equals(right);
+            return ReferenceEquals(left, right) || left!.Equals(right);
         }
 
-        protected static bool NotEqualOperator(ValueObject left, ValueObject right)
+        protected static bool NotEqualOperator(ValueObject? left, ValueObject? right)
         {
             return !(EqualOperator(left, right));
         }
 
         protected abstract IEnumerable<object> GetEqualityComponents();
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (obj == null || obj.GetType() != GetType())
+            if (obj is null || obj.GetType() != GetType())
             {
                 return false;
             }
@@ -33,7 +33,8 @@
         public override int GetHashCode()
         {
             return GetEqualityComponents()
-                .Select(x => x != null ? x.GetHashCode() : 0)
+                .Select(x => x?.GetHashCode() ?? 0)
+                .DefaultIfEmpty(0)
                 .Aggregate((x, y) => x ^ y);
         }
     }

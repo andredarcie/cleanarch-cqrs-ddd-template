@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Common.Errors;
 using DevEval.Application.Users.Commands;
 using DevEval.Application.Users.Dtos;
@@ -12,13 +12,11 @@ namespace DevEval.Application.Users.Handlers
     public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Result<UserDto>>
     {
         private readonly IUserRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IPasswordService _passwordService;
 
-        public UpdateUserHandler(IUserRepository repository, IMapper mapper, IPasswordService passwordService)
+        public UpdateUserHandler(IUserRepository repository, IPasswordService passwordService)
         {
             _repository = repository;
-            _mapper = mapper;
             _passwordService = passwordService;
         }
 
@@ -32,11 +30,11 @@ namespace DevEval.Application.Users.Handlers
             if (!string.IsNullOrEmpty(request.Password))
                 request.Password = _passwordService.HashPassword(request.Password);
 
-            _mapper.Map(request, existingUser);
+            request.ApplyTo(existingUser);
 
             var updatedUser = await _repository.UpdateAsync(existingUser);
 
-            return Result.Ok(_mapper.Map<UserDto>(updatedUser));
+            return Result.Ok(updatedUser.ToDto());
         }
     }
 }

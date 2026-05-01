@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Products.Dtos;
 using DevEval.Application.Products.Queries;
 using DevEval.Common.Helpers.Pagination;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Products.Handlers
     public class GetProductsHandler : IRequestHandler<GetProductsQuery, Result<PaginatedResult<ProductDto>>>
     {
         private readonly IProductRepository _repository;
-        private readonly IMapper _mapper;
 
-        public GetProductsHandler(IProductRepository repository, IMapper mapper)
+        public GetProductsHandler(IProductRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<PaginatedResult<ProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
@@ -25,7 +23,7 @@ namespace DevEval.Application.Products.Handlers
 
             return Result.Ok(new PaginatedResult<ProductDto>
             {
-                Items = _mapper.Map<List<ProductDto>>(result.Items),
+                Items = result.Items.Select(product => product.ToDto()).ToList(),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages

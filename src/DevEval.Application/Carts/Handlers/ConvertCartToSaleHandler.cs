@@ -1,9 +1,9 @@
 using MediatR;
 using DevEval.Application.Sales.Dtos;
-using DevEval.Domain.Entities.Sale;
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Carts.Commands;
 using DevEval.Application.Common.Errors;
+using DevEval.Domain.Entities.Sale;
 using DevEval.Domain.Repositories;
 using FluentResults;
 
@@ -13,16 +13,13 @@ namespace DevEval.Application.Carts.Handlers
     {
         private readonly ICartRepository _cartRepository;
         private readonly ISaleRepository _saleRepository;
-        private readonly IMapper _mapper;
 
         public ConvertCartToSaleHandler(
             ICartRepository cartRepository,
-            ISaleRepository saleRepository,
-            IMapper mapper)
+            ISaleRepository saleRepository)
         {
             _cartRepository = cartRepository;
             _saleRepository = saleRepository;
-            _mapper = mapper;
         }
 
         public async Task<Result<SaleDto>> Handle(ConvertCartToSaleCommand request, CancellationToken cancellationToken)
@@ -39,7 +36,7 @@ namespace DevEval.Application.Carts.Handlers
             var createdSale = await _saleRepository.AddAsync(sale);
             await _cartRepository.DeleteAsync(cart.Id);
 
-            return Result.Ok(_mapper.Map<SaleDto>(createdSale));
+            return Result.Ok(createdSale.ToDto());
         }
     }
 }

@@ -72,6 +72,22 @@
             }
         }
 
+        public void UpdateUserId(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException("UserId must be greater than zero.", nameof(userId));
+
+            UserId = userId;
+        }
+
+        public void UpdateDate(DateTime date)
+        {
+            if (date == default)
+                throw new ArgumentException("Date must be a valid value.", nameof(date));
+
+            Date = date;
+        }
+
         /// <summary>
         /// Removes a product from the cart.
         /// </summary>

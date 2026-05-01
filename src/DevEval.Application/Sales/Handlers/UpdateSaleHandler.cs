@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Common.Errors;
 using DevEval.Application.Sales.Commands;
 using DevEval.Application.Sales.Dtos;
@@ -12,13 +12,11 @@ namespace DevEval.Application.Sales.Handlers
     public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, Result<SaleDto>>
     {
         private readonly ISaleRepository _repository;
-        private readonly IMapper _mapper;
         private readonly ISaleEventPublisher _eventPublisher;
 
-        public UpdateSaleHandler(ISaleRepository repository, IMapper mapper, ISaleEventPublisher eventPublisher)
+        public UpdateSaleHandler(ISaleRepository repository, ISaleEventPublisher eventPublisher)
         {
             _repository = repository;
-            _mapper = mapper;
             _eventPublisher = eventPublisher;
         }
 
@@ -29,12 +27,12 @@ namespace DevEval.Application.Sales.Handlers
             if (existingSale == null)
                 return Result.Fail(new NotFoundError($"Sale with ID {request.Id} not found."));
 
-            _mapper.Map(request, existingSale);
+            request.ApplyTo(existingSale);
 
             var updatedSale = await _repository.UpdateAsync(existingSale);
             await _eventPublisher.PublishSaleModifiedAsync(updatedSale);
 
-            return Result.Ok(_mapper.Map<SaleDto>(updatedSale));
+            return Result.Ok(updatedSale.ToDto());
         }
     }
 }

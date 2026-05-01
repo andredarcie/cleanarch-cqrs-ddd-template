@@ -87,13 +87,29 @@ namespace DevEval.Domain.Entities.User
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
+        public void UpdateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be null or empty.", nameof(email));
+
+            Email = email;
+        }
+
+        public void UpdateUsername(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ArgumentException("Username cannot be null or empty.", nameof(username));
+
+            Username = username;
+        }
+
         /// <summary>
         /// Updates the address of the user.
         /// </summary>
         /// <param name="address">The new address.</param>
-        public void UpdateAddress(Address address)
+        public void UpdateAddress(Address? address)
         {
-            Address = address ?? throw new ArgumentNullException(nameof(address));
+            Address = address;
         }
 
         /// <summary>

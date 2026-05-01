@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Common.Errors;
 using DevEval.Application.Users.Dtos;
 using DevEval.Application.Users.Queries;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Users.Handlers
     public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, Result<UserDto>>
     {
         private readonly IUserRepository _repository;
-        private readonly IMapper _mapper;
 
-        public GetUserByIdHandler(IUserRepository repository, IMapper mapper)
+        public GetUserByIdHandler(IUserRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<UserDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
@@ -26,7 +24,7 @@ namespace DevEval.Application.Users.Handlers
             if (user == null)
                 return Result.Fail(new NotFoundError($"User with ID {request.Id} not found."));
 
-            return Result.Ok(_mapper.Map<UserDto>(user));
+            return Result.Ok(user.ToDto());
         }
     }
 }

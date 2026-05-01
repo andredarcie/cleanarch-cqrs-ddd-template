@@ -1,4 +1,4 @@
-using AutoMapper;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Carts.Dtos;
 using DevEval.Application.Carts.Queries;
 using DevEval.Application.Common.Errors;
@@ -11,12 +11,10 @@ namespace DevEval.Application.Carts.Handlers
     public class GetCartByIdHandler : IRequestHandler<GetCartByIdQuery, Result<CartDto>>
     {
         private readonly ICartRepository _repository;
-        private readonly IMapper _mapper;
 
-        public GetCartByIdHandler(ICartRepository repository, IMapper mapper)
+        public GetCartByIdHandler(ICartRepository repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
 
         public async Task<Result<CartDto>> Handle(GetCartByIdQuery request, CancellationToken cancellationToken)
@@ -26,7 +24,7 @@ namespace DevEval.Application.Carts.Handlers
             if (cart == null)
                 return Result.Fail(new NotFoundError($"Cart with ID {request.Id} not found."));
 
-            return Result.Ok(_mapper.Map<CartDto>(cart));
+            return Result.Ok(cart.ToDto());
         }
     }
 }

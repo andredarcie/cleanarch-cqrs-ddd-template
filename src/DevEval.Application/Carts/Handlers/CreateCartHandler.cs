@@ -1,8 +1,7 @@
-using AutoMapper;
 using DevEval.Application.Carts.Commands;
+using DevEval.Application.Common.Mappings;
 using DevEval.Application.Carts.Dtos;
 using DevEval.Application.Common.Errors;
-using DevEval.Domain.Entities.Cart;
 using DevEval.Domain.Repositories;
 using FluentResults;
 using MediatR;
@@ -13,12 +12,10 @@ namespace DevEval.Application.Carts.Handlers
     {
         private readonly ICartRepository _repository;
         private readonly IProductRepository _productRepository;
-        private readonly IMapper _mapper;
 
-        public CreateCartHandler(ICartRepository repository, IMapper mapper, IProductRepository productRepository)
+        public CreateCartHandler(ICartRepository repository, IProductRepository productRepository)
         {
             _repository = repository;
-            _mapper = mapper;
             _productRepository = productRepository;
         }
 
@@ -26,7 +23,7 @@ namespace DevEval.Application.Carts.Handlers
         {
             request.Date = DateTime.UtcNow;
 
-            var cart = _mapper.Map<Cart>(request);
+            var cart = request.ToEntity();
 
             foreach (var cartProduct in cart.Products.Where(product => product != null))
             {
@@ -37,7 +34,7 @@ namespace DevEval.Application.Carts.Handlers
             }
 
             var createdCart = await _repository.AddAsync(cart);
-            return Result.Ok(_mapper.Map<CartDto>(createdCart));
+            return Result.Ok(createdCart.ToDto());
         }
     }
 }

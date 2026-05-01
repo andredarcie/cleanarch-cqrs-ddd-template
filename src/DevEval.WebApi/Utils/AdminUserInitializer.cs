@@ -1,6 +1,5 @@
 ﻿using DevEval.Application.Users.Commands;
 using DevEval.Application.Users.Dtos;
-using DevEval.Common.Services;
 using DevEval.Domain.Enums;
 using DevEval.Domain.Repositories;
 
@@ -12,8 +11,6 @@ namespace DevEval.WebApi.Utils
         {
             using var scope = serviceProvider.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-            var mapper = scope.ServiceProvider.GetRequiredService<AutoMapper.IMapper>();
-            var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
             var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
 
             var existingAdmin = await repository.GetByUsernameAsync("admin");
