@@ -105,6 +105,9 @@
             if (quantity <= 0)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
 
+            if (quantity > 20)
+                throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must not exceed 20 identical items.");
+
             if (unitPrice <= 0)
                 throw new ArgumentOutOfRangeException(nameof(unitPrice), "UnitPrice must be greater than zero.");
 
@@ -170,17 +173,22 @@
         /// </summary>
         /// <param name="cart">The shopping cart to convert into a sale.</param>
         /// <returns>A new instance of <see cref="Sale"/>.</returns>
-        public static Sale FromCart(Cart.Cart? cart)
+        public static Sale FromCart(
+            Cart.Cart? cart,
+            Guid customerId,
+            string customerName,
+            Guid branchId,
+            string branchName)
         {
             if (cart == null)
                 throw new ArgumentNullException(nameof(cart));
 
             var sale = new Sale(
-                Guid.NewGuid().ToString(),
-                Guid.NewGuid(), // Replace with real customer ID
-                $"Customer-{cart.UserId}", // Replace with real customer name
-                Guid.NewGuid(), // Replace with real branch ID
-                "Default Branch" // Replace with real branch name
+                $"CART-{cart.Id}-{DateTime.UtcNow:yyyyMMddHHmmss}",
+                customerId,
+                customerName,
+                branchId,
+                branchName
             );
 
             foreach (var product in cart.Products)

@@ -19,11 +19,16 @@ namespace DevEval.Application.Users.Handlers
 
         public async Task<Result<PaginatedResult<UserDto>>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllAsync(request.Parameters);
+            var result = await _repository.GetFilteredAsync(
+                request.Username,
+                request.Email,
+                request.Status,
+                request.Role,
+                request.Parameters);
 
             return Result.Ok(new PaginatedResult<UserDto>
             {
-                Items = result.Items.Select(user => user.ToDto()).ToList(),
+                Data = result.Data.Select(user => user.ToDto()).ToList(),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages

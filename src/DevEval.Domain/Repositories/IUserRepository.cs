@@ -1,5 +1,7 @@
-﻿using DevEval.Common;
+using DevEval.Common;
+using DevEval.Common.Helpers.Pagination;
 using DevEval.Domain.Entities.User;
+using DevEval.Domain.Enums;
 
 namespace DevEval.Domain.Repositories
 {
@@ -9,5 +11,11 @@ namespace DevEval.Domain.Repositories
     public interface IUserRepository : IRepository<User, int>
     {
         Task<User?> GetByUsernameAsync(string username);
+        Task<PaginatedResult<User>> GetFilteredAsync(
+            string? username,
+            string? email,
+            UserStatus? status,
+            UserRole? role,
+            PaginationParameters parameters);
     }
 }

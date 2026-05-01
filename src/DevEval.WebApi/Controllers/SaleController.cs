@@ -101,7 +101,7 @@ namespace DevEval.WebApi.Controllers
         {
             var result = await _mediator.Send(new DeleteSaleCommand(id));
             if (result.IsFailed) return MapErrors(result);
-            return Ok(new { Message = "Sale deleted successfully" });
+            return Ok(new { message = "Sale cancelled successfully" });
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace DevEval.WebApi.Controllers
         {
             var result = await _mediator.Send(new CancelSaleItemCommand(saleId, itemId, reason));
             if (result.IsFailed) return MapErrors(result);
-            return Ok(new { Message = "Item cancelled successfully." });
+            return Ok(new { message = "Item cancelled successfully" });
         }
     }
 }

@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using DevEval.Application.Users.Commands;
-using DevEval.Common.Helpers.Pagination;
-using DevEval.Application.Users.Queries;
 using DevEval.Application.Users.Dtos;
+using DevEval.Application.Users.Queries;
+using DevEval.Common.Helpers.Pagination;
+using DevEval.WebApi.Requests;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DevEval.WebApi.Controllers
 {
@@ -28,17 +29,19 @@ namespace DevEval.WebApi.Controllers
         /// <response code="200">Returns the paginated list of Users.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<UserDto>), 200)]
-        public async Task<IActionResult> GetUsers(
-            [FromQuery] int _page = 1,
-            [FromQuery] int _size = 10,
-            [FromQuery] string _order = "")
+        public async Task<IActionResult> GetUsers([FromQuery] UserQueryRequest request)
         {
-            var result = await _mediator.Send(new GetUsersQuery(new PaginationParameters
-            {
-                Page = _page,
-                PageSize = _size,
-                OrderBy = _order
-            }));
+            var result = await _mediator.Send(new GetUsersQuery(
+                new PaginationParameters
+                {
+                    Page = request.Page <= 0 ? 1 : request.Page,
+                    PageSize = request.Size <= 0 ? 10 : request.Size,
+                    OrderBy = request.Order
+                },
+                request.Username,
+                request.Email,
+                request.Status,
+                request.Role));
 
             return HandleResult(result);
         }
@@ -101,7 +104,7 @@ namespace DevEval.WebApi.Controllers
         {
             var result = await _mediator.Send(new DeleteUserCommand(id));
             if (result.IsFailed) return MapErrors(result);
-            return Ok(new { Message = "User deleted successfully" });
+            return Ok(new { message = "User deleted successfully" });
         }
     }
 }

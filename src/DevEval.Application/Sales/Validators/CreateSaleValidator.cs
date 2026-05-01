@@ -9,7 +9,7 @@ namespace DevEval.Application.Sales.Validators
         {
             RuleFor(command => command.SaleNumber)
                 .NotEmpty().WithMessage("Sale number is required.")
-                .Matches("^[A-Za-z0-9]+$").WithMessage("Sale number must be alphanumeric.");
+                .Matches("^[A-Za-z0-9-]+$").WithMessage("Sale number must be alphanumeric and may include hyphens.");
 
             RuleFor(command => command.SaleDate)
                 .NotEmpty().WithMessage("Sale date is required.")

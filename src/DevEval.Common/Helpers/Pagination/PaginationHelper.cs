@@ -18,7 +18,7 @@ namespace DevEval.Common.Helpers.Pagination
 
             return new PaginatedResult<T>
             {
-                Items = items,
+                Data = items,
                 TotalItems = totalItems,
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)

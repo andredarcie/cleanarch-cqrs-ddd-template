@@ -24,8 +24,9 @@ namespace DevEval.Application.Sales.Handlers
             if (sale == null)
                 return Result.Fail(new NotFoundError($"Sale with ID {request.Id} not found."));
 
+            sale.CancelSale();
+            await _repository.UpdateAsync(sale);
             await _eventPublisher.PublishSaleCancelledAsync(sale, "Cancelled by user");
-            await _repository.DeleteAsync(request.Id);
 
             return Result.Ok();
         }

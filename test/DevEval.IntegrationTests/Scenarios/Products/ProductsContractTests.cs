@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using DevEval.IntegrationTests.Fixtures;
 using DevEval.IntegrationTests.Infrastructure;
 
@@ -73,7 +74,7 @@ public sealed class ProductsContractTests : IntegrationTestBase
         var paginatedResult = await response.Content.ReadFromJsonAsync<PaginatedResponse<ProductResponse>>();
 
         Assert.NotNull(paginatedResult);
-        Assert.Empty(paginatedResult.Items);
+        Assert.Empty(paginatedResult.Data);
         Assert.Equal(0, paginatedResult.TotalItems);
         Assert.Equal(1, paginatedResult.CurrentPage);
         Assert.Equal(0, paginatedResult.TotalPages);
@@ -91,7 +92,7 @@ public sealed class ProductsContractTests : IntegrationTestBase
     private sealed record RatingResponse(double Rate, int Count);
 
     private sealed record PaginatedResponse<T>(
-        IReadOnlyList<T> Items,
+        [property: JsonPropertyName("data")] IReadOnlyList<T> Data,
         int TotalItems,
         int CurrentPage,
         int TotalPages);

@@ -22,5 +22,16 @@ namespace DevEval.Domain.Repositories
         /// <param name="parameters">Pagination and sorting parameters.</param>
         /// <returns>A paginated result of products in the specified category.</returns>
         Task<PaginatedResult<Product>> GetProductsByCategoryAsync(string category, PaginationParameters parameters);
+
+        /// <summary>
+        /// Retrieves products using the supported API filters.
+        /// </summary>
+        Task<PaginatedResult<Product>> GetFilteredAsync(
+            string? title,
+            string? category,
+            decimal? price,
+            decimal? minPrice,
+            decimal? maxPrice,
+            PaginationParameters parameters);
     }
 }

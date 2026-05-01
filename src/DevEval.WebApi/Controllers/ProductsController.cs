@@ -3,6 +3,7 @@ using DevEval.Application.Products.Dtos;
 using DevEval.Application.Products.Queries;
 using DevEval.Common.Helpers.Pagination;
 using DevEval.WebApi.Controllers;
+using DevEval.WebApi.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,17 +30,20 @@ namespace DevEval.API.Controllers
         /// <response code="200">Returns the paginated list of products.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<ProductDto>), 200)]
-        public async Task<IActionResult> GetProducts(
-            [FromQuery] int _page = 1,
-            [FromQuery] int _size = 10,
-            [FromQuery] string _order = "")
+        public async Task<IActionResult> GetProducts([FromQuery] ProductQueryRequest request)
         {
-            var result = await _mediator.Send(new GetProductsQuery(new PaginationParameters
-            {
-                Page = _page,
-                PageSize = _size,
-                OrderBy = _order
-            }));
+            var result = await _mediator.Send(new GetProductsQuery(
+                new PaginationParameters
+                {
+                    Page = request.Page <= 0 ? 1 : request.Page,
+                    PageSize = request.Size <= 0 ? 10 : request.Size,
+                    OrderBy = request.Order
+                },
+                request.Title,
+                request.Category,
+                request.Price,
+                request.MinPrice,
+                request.MaxPrice));
 
             return HandleResult(result);
         }
@@ -122,12 +126,12 @@ namespace DevEval.API.Controllers
         /// </summary>
         /// <response code="204">If the product is deleted successfully.</response>
         [HttpDelete("{id}")]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             var result = await _mediator.Send(new DeleteProductCommand(id));
             if (result.IsFailed) return MapErrors(result);
-            return NoContent();
+            return Ok(new { message = "Product deleted successfully" });
         }
     }
 }

@@ -19,11 +19,15 @@ namespace DevEval.Application.Carts.Handlers
 
         public async Task<Result<PaginatedResult<CartDto>>> Handle(GetCartsQuery request, CancellationToken cancellationToken)
         {
-            var result = await _repository.GetAllWithProductsAsync(request.Parameters);
+            var result = await _repository.GetFilteredAsync(
+                request.UserId,
+                request.MinDate,
+                request.MaxDate,
+                request.Parameters);
 
             return Result.Ok(new PaginatedResult<CartDto>
             {
-                Items = result.Items.Select(cart => cart.ToDto()).ToList(),
+                Data = result.Data.Select(cart => cart.ToDto()).ToList(),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages

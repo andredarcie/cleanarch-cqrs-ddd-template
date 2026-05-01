@@ -37,6 +37,10 @@ internal static class SaleMappings
             Id = sale.Id,
             SaleNumber = sale.SaleNumber,
             SaleDate = sale.SaleDate,
+            CustomerId = sale.CustomerId,
+            CustomerName = sale.CustomerName,
+            BranchId = sale.BranchId,
+            BranchName = sale.BranchName,
             TotalAmount = sale.TotalAmount,
             IsCancelled = sale.IsCancelled,
             Items = sale.Items.Select(item => item.ToDto()).ToList()

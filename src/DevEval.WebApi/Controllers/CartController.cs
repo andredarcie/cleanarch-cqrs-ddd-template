@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using DevEval.Application.Carts.Commands;
-using DevEval.Common.Helpers.Pagination;
-using DevEval.Application.Carts.Queries;
 using DevEval.Application.Carts.Dtos;
+using DevEval.Application.Carts.Queries;
 using DevEval.Application.Sales.Dtos;
+using DevEval.Common.Helpers.Pagination;
+using DevEval.WebApi.Requests;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DevEval.WebApi.Controllers
 {
@@ -29,17 +30,18 @@ namespace DevEval.WebApi.Controllers
         /// <response code="200">Returns the paginated list of carts.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<CartDto>), 200)]
-        public async Task<IActionResult> GetCarts(
-            [FromQuery] int _page = 1,
-            [FromQuery] int _size = 10,
-            [FromQuery] string _order = "")
+        public async Task<IActionResult> GetCarts([FromQuery] CartQueryRequest request)
         {
-            var result = await _mediator.Send(new GetCartsQuery(new PaginationParameters
-            {
-                Page = _page,
-                PageSize = _size,
-                OrderBy = _order
-            }));
+            var result = await _mediator.Send(new GetCartsQuery(
+                new PaginationParameters
+                {
+                    Page = request.Page <= 0 ? 1 : request.Page,
+                    PageSize = request.Size <= 0 ? 10 : request.Size,
+                    OrderBy = request.Order
+                },
+                request.UserId,
+                request.MinDate,
+                request.MaxDate));
 
             return HandleResult(result);
         }
@@ -116,7 +118,7 @@ namespace DevEval.WebApi.Controllers
         {
             var result = await _mediator.Send(new DeleteCartCommand(id));
             if (result.IsFailed) return MapErrors(result);
-            return Ok(new { Message = "Cart deleted successfully" });
+            return Ok(new { message = "Cart deleted successfully" });
         }
 
         /// <summary>

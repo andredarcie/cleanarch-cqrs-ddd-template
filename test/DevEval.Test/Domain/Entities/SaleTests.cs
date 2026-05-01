@@ -95,6 +95,16 @@ namespace DevEval.Test.Domain.Entities
             Assert.Throws<ArgumentOutOfRangeException>(() => sale.AddItem(1, invalidQuantity, 50.0m));
         }
 
+        [Fact]
+        public void Should_Throw_Exception_When_Adding_Item_Above_Maximum_Quantity()
+        {
+            // Arrange
+            var sale = new Sale("SALE-001", Guid.NewGuid(), "John Doe", Guid.NewGuid(), "Main Branch");
+
+            // Act & Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => sale.AddItem(1, 21, 50.0m));
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(-10)]
@@ -130,21 +140,29 @@ namespace DevEval.Test.Domain.Entities
             var cart = new Cart(1);
             cart.AddProduct(new CartProduct(1, 50.0m, 2));
             cart.AddProduct(new CartProduct(2, 30.0m, 1));
+            var customerId = Guid.NewGuid();
+            const string customerName = "John Doe";
+            var branchId = Guid.NewGuid();
+            const string branchName = "Main Branch";
 
             // Act
-            var sale = Sale.FromCart(cart);
+            var sale = Sale.FromCart(cart, customerId, customerName, branchId, branchName);
 
             // Assert
             Assert.NotNull(sale);
             Assert.Equal(2, sale.Items.Count);
             Assert.Equal(130.0m, sale.TotalAmount);
+            Assert.Equal(customerId, sale.CustomerId);
+            Assert.Equal(customerName, sale.CustomerName);
+            Assert.Equal(branchId, sale.BranchId);
+            Assert.Equal(branchName, sale.BranchName);
         }
 
         [Fact]
         public void Should_Throw_Exception_When_Creating_Sale_From_Null_Cart()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => Sale.FromCart(null));
+            Assert.Throws<ArgumentNullException>(() => Sale.FromCart(null, Guid.NewGuid(), "John Doe", Guid.NewGuid(), "Main Branch"));
         }
     }
 }

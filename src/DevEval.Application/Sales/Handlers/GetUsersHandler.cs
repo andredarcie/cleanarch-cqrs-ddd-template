@@ -23,7 +23,7 @@ namespace DevEval.Application.Users.Handlers
 
             return Result.Ok(new PaginatedResult<SaleDto>
             {
-                Items = result.Items.Select(sale => sale.ToDto()).ToList(),
+                Data = result.Data.Select(sale => sale.ToDto()).ToList(),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages
