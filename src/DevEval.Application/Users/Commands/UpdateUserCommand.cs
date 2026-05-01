@@ -1,10 +1,11 @@
 ﻿using DevEval.Application.Users.Dtos;
 using DevEval.Domain.Enums;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Users.Commands
 {
-    public class UpdateUserCommand : IRequest<UserDto>
+    public class UpdateUserCommand : IRequest<Result<UserDto>>
     {
         public int Id { get; set; }
         public string Email { get; set; } = string.Empty;

@@ -1,13 +1,14 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Sales.Dtos;
 using DevEval.Application.Sales.Queries;
 using DevEval.Common.Helpers.Pagination;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Users.Handlers
 {
-    public class GetSalesHandler : IRequestHandler<GetSalesQuery, PaginatedResult<SaleDto>>
+    public class GetSalesHandler : IRequestHandler<GetSalesQuery, Result<PaginatedResult<SaleDto>>>
     {
         private readonly ISaleRepository _repository;
         private readonly IMapper _mapper;
@@ -18,17 +19,17 @@ namespace DevEval.Application.Users.Handlers
             _mapper = mapper;
         }
 
-        public async Task<PaginatedResult<SaleDto>> Handle(GetSalesQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedResult<SaleDto>>> Handle(GetSalesQuery request, CancellationToken cancellationToken)
         {
             var result = await _repository.GetAllAsync(request.Parameters);
 
-            return new PaginatedResult<SaleDto>
+            return Result.Ok(new PaginatedResult<SaleDto>
             {
                 Items = _mapper.Map<List<SaleDto>>(result.Items),
                 TotalItems = result.TotalItems,
                 CurrentPage = result.CurrentPage,
                 TotalPages = result.TotalPages
-            };
+            });
         }
     }
 }

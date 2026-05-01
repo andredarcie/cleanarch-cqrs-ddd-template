@@ -1,12 +1,14 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Carts.Commands;
 using DevEval.Application.Carts.Dtos;
+using DevEval.Application.Common.Errors;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Carts.Handlers
 {
-    public class UpdateCartHandler : IRequestHandler<UpdateCartCommand, CartDto>
+    public class UpdateCartHandler : IRequestHandler<UpdateCartCommand, Result<CartDto>>
     {
         private readonly ICartRepository _repository;
         private readonly IMapper _mapper;
@@ -17,19 +19,18 @@ namespace DevEval.Application.Carts.Handlers
             _mapper = mapper;
         }
 
-        public async Task<CartDto> Handle(UpdateCartCommand request, CancellationToken cancellationToken)
+        public async Task<Result<CartDto>> Handle(UpdateCartCommand request, CancellationToken cancellationToken)
         {
             var existingCart = await _repository.GetByIdAsync(request.Id);
 
-            if (existingCart == null) throw new KeyNotFoundException($"Cart with ID {request.Id} not found.");
+            if (existingCart == null)
+                return Result.Fail(new NotFoundError($"Cart with ID {request.Id} not found."));
 
             _mapper.Map(request, existingCart);
 
             var updatedCart = await _repository.UpdateAsync(existingCart);
 
-            var result = _mapper.Map<CartDto>(updatedCart);
-
-            return result;
+            return Result.Ok(_mapper.Map<CartDto>(updatedCart));
         }
     }
 }

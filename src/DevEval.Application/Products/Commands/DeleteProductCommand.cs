@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 
 namespace DevEval.Application.Products.Commands
 {
-    public class DeleteProductCommand : IRequest
+    public class DeleteProductCommand : IRequest<Result>
     {
         public DeleteProductCommand(int id)
         {

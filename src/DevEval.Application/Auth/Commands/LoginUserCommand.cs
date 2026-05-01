@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Auth.Commands
 {
-    public class LoginUserCommand : IRequest<string>
+    public class LoginUserCommand : IRequest<Result<string>>
     {
         [DefaultValue("admin")]
         public string Username { get; set; }

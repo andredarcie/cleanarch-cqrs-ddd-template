@@ -1,12 +1,14 @@
-﻿using AutoMapper;
+using AutoMapper;
+using DevEval.Application.Common.Errors;
 using DevEval.Application.Products.Commands;
 using DevEval.Application.Products.Dtos;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Products.Handlers
 {
-    public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, ProductDto>
+    public class UpdateProductHandler : IRequestHandler<UpdateProductCommand, Result<ProductDto>>
     {
         private readonly IProductRepository _repository;
         private readonly IMapper _mapper;
@@ -17,19 +19,18 @@ namespace DevEval.Application.Products.Handlers
             _mapper = mapper;
         }
 
-        public async Task<ProductDto> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+        public async Task<Result<ProductDto>> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
             var existingProduct = await _repository.GetByIdAsync(request.Id);
 
-            if (existingProduct == null) throw new KeyNotFoundException($"Product with ID {request.Id} not found.");
+            if (existingProduct == null)
+                return Result.Fail(new NotFoundError($"Product with ID {request.Id} not found."));
 
             _mapper.Map(request, existingProduct);
 
             var updatedProduct = await _repository.UpdateAsync(existingProduct);
 
-            var result = _mapper.Map<ProductDto>(updatedProduct);
-
-            return result;
+            return Result.Ok(_mapper.Map<ProductDto>(updatedProduct));
         }
     }
 }

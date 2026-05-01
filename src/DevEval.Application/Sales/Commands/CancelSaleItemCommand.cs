@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 
 namespace DevEval.Application.Sales.Commands
 {
-    public class CancelSaleItemCommand : IRequest<bool>
+    public class CancelSaleItemCommand : IRequest<Result>
     {
         public Guid SaleId { get; set; }
         public Guid ItemId { get; set; }

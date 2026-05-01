@@ -1,10 +1,11 @@
-﻿using DevEval.Application.Products.Commands;
+using DevEval.Application.Products.Commands;
+using DevEval.Application.Products.Dtos;
 using DevEval.Application.Products.Queries;
 using DevEval.Common.Helpers.Pagination;
+using DevEval.WebApi.Controllers;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using DevEval.Application.Products.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DevEval.API.Controllers
 {
@@ -12,16 +13,11 @@ namespace DevEval.API.Controllers
     /// API for managing Products, including retrieval, creation, updating, and deletion of products.
     /// </summary>
     [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
-    public class ProductsController : ControllerBase
+    public class ProductsController : BaseController
     {
         private readonly IMediator _mediator;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProductsController"/> class.
-        /// </summary>
-        /// <param name="mediator">Mediator instance for handling requests.</param>
         public ProductsController(IMediator mediator)
         {
             _mediator = mediator;
@@ -30,137 +26,108 @@ namespace DevEval.API.Controllers
         /// <summary>
         /// Retrieves all products with pagination.
         /// </summary>
-        /// <param name="parameters">Pagination parameters, including page number and page size.</param>
-        /// <returns>A paginated list of products.</returns>
         /// <response code="200">Returns the paginated list of products.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<ProductDto>), 200)]
-        public async Task<ActionResult<PaginatedResult<ProductDto>>> GetProducts(
+        public async Task<IActionResult> GetProducts(
             [FromQuery] int _page = 1,
             [FromQuery] int _size = 10,
             [FromQuery] string _order = "")
         {
-            var query = new GetProductsQuery(new PaginationParameters
+            var result = await _mediator.Send(new GetProductsQuery(new PaginationParameters
             {
                 Page = _page,
                 PageSize = _size,
                 OrderBy = _order
-            });
+            }));
 
-            var result = await _mediator.Send(query);
-            return Ok(result);
+            return HandleResult(result);
         }
 
         /// <summary>
         /// Retrieves a product by ID.
         /// </summary>
-        /// <param name="id">The ID of the product to retrieve.</param>
-        /// <returns>The product with the specified ID.</returns>
+        /// <response code="200">Returns the product.</response>
+        /// <response code="404">If the product is not found.</response>
+        [HttpGet("categories")]
+        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        public async Task<IActionResult> GetCategories()
+        {
+            var result = await _mediator.Send(new GetCategoriesQuery());
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Retrieves a product by ID.
+        /// </summary>
         /// <response code="200">Returns the product.</response>
         /// <response code="404">If the product is not found.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProductDto), 200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<ProductDto>> GetProductById(int id)
+        public async Task<IActionResult> GetProductById(int id)
         {
-            var query = new GetProductByIdQuery(id);
-            var result = await _mediator.Send(query);
-
-            if (result == null)
-                return NotFound(new { Message = $"Product with ID {id} not found." });
-
-            return Ok(result);
+            var result = await _mediator.Send(new GetProductByIdQuery(id));
+            return HandleResult(result);
         }
 
         /// <summary>
         /// Retrieves products by category with pagination.
         /// </summary>
-        /// <param name="category">The category to filter products by.</param>
-        /// <param name="parameters">Pagination parameters, including page number and page size.</param>
-        /// <returns>A paginated list of products in the specified category.</returns>
         /// <response code="200">Returns the paginated list of products in the category.</response>
         [HttpGet("category/{category}")]
         [ProducesResponseType(typeof(PaginatedResult<ProductDto>), 200)]
-        public async Task<ActionResult<PaginatedResult<ProductDto>>> GetProductsByCategory(string category, [FromQuery] PaginationParameters parameters)
+        public async Task<IActionResult> GetProductsByCategory(string category, [FromQuery] PaginationParameters parameters)
         {
-            var query = new GetProductsByCategoryQuery(category, parameters);
-            var result = await _mediator.Send(query);
-            return Ok(result);
+            var result = await _mediator.Send(new GetProductsByCategoryQuery(category, parameters));
+            return HandleResult(result);
         }
 
         /// <summary>
         /// Creates a new product.
         /// </summary>
-        /// <param name="command">The command containing product details.</param>
-        /// <returns>The created product.</returns>
         /// <response code="201">Returns the created product.</response>
         /// <response code="400">If the product data is invalid.</response>
         [HttpPost]
         [ProducesResponseType(typeof(ProductDto), 201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductCommand command)
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
         {
-            if (command == null)
-                return BadRequest(new { Message = "Invalid product data." });
-
             var result = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetProductById), new { id = result.Id }, result);
+
+            if (result.IsFailed) return MapErrors(result);
+
+            return CreatedAtAction(nameof(GetProductById), new { id = result.Value.Id }, result.Value);
         }
 
         /// <summary>
         /// Updates an existing product by ID.
         /// </summary>
-        /// <param name="id">The ID of the product to update.</param>
-        /// <param name="command">The command containing updated product details.</param>
-        /// <returns>No content if the update is successful.</returns>
-        /// <response code="204">If the product is updated successfully.</response>
+        /// <response code="200">Returns the updated product.</response>
         /// <response code="400">If the product data is invalid.</response>
         /// <response code="404">If the product is not found.</response>
         [HttpPut("{id}")]
-        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(ProductDto), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductCommand command)
         {
-            if (command == null)
-                return BadRequest(new { Message = "Invalid product data." });
-
-            command.Id = id; // Ensure the ID matches the route
+            command.Id = id;
             var result = await _mediator.Send(command);
-
-            if (result is null)
-                return NotFound(new { Message = $"Product with ID {id} not found." });
-
-            return NoContent();
+            return HandleResult(result);
         }
 
         /// <summary>
         /// Deletes a product by ID.
         /// </summary>
-        /// <param name="id">The ID of the product to delete.</param>
         /// <response code="204">If the product is deleted successfully.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var command = new DeleteProductCommand(id);
-            await _mediator.Send(command);
-
+            var result = await _mediator.Send(new DeleteProductCommand(id));
+            if (result.IsFailed) return MapErrors(result);
             return NoContent();
-        }
-
-        /// <summary>
-        /// Retrieves all available categories.
-        /// </summary>
-        /// <returns>A list of product categories.</returns>
-        /// <response code="200">Returns the list of categories.</response>
-        [HttpGet("categories")]
-        [ProducesResponseType(typeof(IEnumerable<string>), 200)]
-        public async Task<ActionResult<IEnumerable<string>>> GetCategories()
-        {
-            var query = new GetCategoriesQuery();
-            var result = await _mediator.Send(query);
-            return Ok(result);
         }
     }
 }

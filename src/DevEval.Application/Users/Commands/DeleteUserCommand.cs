@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 
 namespace DevEval.Application.Users.Commands
 {
-    public class DeleteUserCommand : IRequest
+    public class DeleteUserCommand : IRequest<Result>
     {
         public DeleteUserCommand(int id)
         {

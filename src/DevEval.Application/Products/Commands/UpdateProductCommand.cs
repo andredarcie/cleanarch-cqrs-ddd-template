@@ -1,9 +1,10 @@
 ﻿using DevEval.Application.Products.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Products.Commands
 {
-    public class UpdateProductCommand : IRequest<ProductDto>
+    public class UpdateProductCommand : IRequest<Result<ProductDto>>
     {
         public int Id { get; set; }
         public required string Title { get; set; }

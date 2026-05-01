@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 
 namespace DevEval.Application.Products.Queries
 {
-    public class GetCategoriesQuery : IRequest<IEnumerable<string>>
+    public class GetCategoriesQuery : IRequest<Result<IEnumerable<string>>>
     {
     }
 }

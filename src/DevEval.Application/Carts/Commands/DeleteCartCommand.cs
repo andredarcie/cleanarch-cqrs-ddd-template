@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 
 namespace DevEval.Application.Carts.Commands
 {
-    public class DeleteCartCommand : IRequest
+    public class DeleteCartCommand : IRequest<Result>
     {
         public DeleteCartCommand(int id)
         {

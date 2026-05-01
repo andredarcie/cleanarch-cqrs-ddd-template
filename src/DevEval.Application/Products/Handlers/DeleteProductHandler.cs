@@ -1,10 +1,11 @@
-﻿using DevEval.Application.Products.Commands;
+using DevEval.Application.Products.Commands;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Products.Handlers
 {
-    public class DeleteProductHandler : IRequestHandler<DeleteProductCommand>
+    public class DeleteProductHandler : IRequestHandler<DeleteProductCommand, Result>
     {
         private readonly IProductRepository _repository;
 
@@ -13,9 +14,10 @@ namespace DevEval.Application.Products.Handlers
             _repository = repository;
         }
 
-        public async Task Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
         {
             await _repository.DeleteAsync(request.Id);
+            return Result.Ok();
         }
     }
 }

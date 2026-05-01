@@ -1,4 +1,5 @@
-﻿using DevEval.Application.Sales.Commands;
+using DevEval.Application.Common.Errors;
+using DevEval.Application.Sales.Commands;
 using DevEval.Application.Sales.Services;
 using DevEval.Domain.Entities.Sale;
 using DevEval.Domain.Repositories;
@@ -34,11 +35,9 @@ namespace DevEval.Test.Application.Sales.Handlers
             typeof(Sale).GetProperty(nameof(Sale.Id))?.SetValue(sale, saleId);
             sale.AddItem(saleItem.ProductId, saleItem.Quantity, saleItem.UnitPrice);
 
-            // Update the Sale's item ID to ensure it's correct
             var addedItem = sale.Items.First();
             typeof(SaleItem).GetProperty(nameof(SaleItem.Id))?.SetValue(addedItem, itemId);
 
-            // Mock repository behavior
             _saleRepositoryMock.GetByIdAsync(saleId).Returns(sale);
 
             var command = new CancelSaleItemCommand(saleId, itemId, reason);
@@ -47,14 +46,14 @@ namespace DevEval.Test.Application.Sales.Handlers
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.True(result);
+            Assert.True(result.IsSuccess);
             Assert.True(addedItem.IsCancelled);
             await _saleRepositoryMock.Received(1).UpdateAsync(sale);
             await _eventPublisherMock.Received(1).PublishItemCancelledAsync(saleId, addedItem, reason);
         }
 
         [Fact]
-        public async Task Handle_ShouldThrowKeyNotFoundException_WhenSaleDoesNotExist()
+        public async Task Handle_ShouldReturnNotFoundError_WhenSaleDoesNotExist()
         {
             // Arrange
             var saleId = Guid.NewGuid();
@@ -64,18 +63,20 @@ namespace DevEval.Test.Application.Sales.Handlers
 
             var command = new CancelSaleItemCommand(saleId, itemId, "Not found");
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
 
-            Assert.Equal($"Sale with ID {saleId} not found.", exception.Message);
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<NotFoundError>(result.Errors.First());
+            Assert.Equal($"Sale with ID {saleId} not found.", result.Errors.First().Message);
             await _saleRepositoryMock.Received(1).GetByIdAsync(saleId);
             await _saleRepositoryMock.DidNotReceive().UpdateAsync(Arg.Any<Sale>());
             await _eventPublisherMock.DidNotReceive().PublishItemCancelledAsync(Arg.Any<Guid>(), Arg.Any<SaleItem>(), Arg.Any<string>());
         }
 
         [Fact]
-        public async Task Handle_ShouldThrowKeyNotFoundException_WhenItemDoesNotExistInSale()
+        public async Task Handle_ShouldReturnNotFoundError_WhenItemDoesNotExistInSale()
         {
             // Arrange
             var saleId = Guid.NewGuid();
@@ -88,11 +89,13 @@ namespace DevEval.Test.Application.Sales.Handlers
 
             var command = new CancelSaleItemCommand(saleId, invalidItemId, "Item not found");
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
 
-            Assert.Equal($"Item with ID {invalidItemId} not found in sale {saleId}.", exception.Message);
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<NotFoundError>(result.Errors.First());
+            Assert.Equal($"Item with ID {invalidItemId} not found in sale {saleId}.", result.Errors.First().Message);
             await _saleRepositoryMock.Received(1).GetByIdAsync(saleId);
             await _saleRepositoryMock.DidNotReceive().UpdateAsync(Arg.Any<Sale>());
             await _eventPublisherMock.DidNotReceive().PublishItemCancelledAsync(Arg.Any<Guid>(), Arg.Any<SaleItem>(), Arg.Any<string>());

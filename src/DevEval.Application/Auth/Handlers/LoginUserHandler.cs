@@ -1,6 +1,8 @@
-﻿using DevEval.Application.Auth.Commands;
+using DevEval.Application.Auth.Commands;
+using DevEval.Application.Common.Errors;
 using DevEval.Common.Services;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +12,7 @@ using System.Text;
 
 namespace Application.Users.Handlers
 {
-    public class LoginUserHandler : IRequestHandler<LoginUserCommand, string>
+    public class LoginUserHandler : IRequestHandler<LoginUserCommand, Result<string>>
     {
         private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
@@ -23,16 +25,14 @@ namespace Application.Users.Handlers
             _passwordService = passwordService;
         }
 
-        public async Task<string> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByUsernameAsync(request.Username);
 
             if (user == null || !_passwordService.VerifyPassword(user.Password, request.Password))
-            {
-                throw new UnauthorizedAccessException("Invalid username or password");
-            }
+                return Result.Fail(new UnauthorizedError("Invalid username or password"));
 
-            return GenerateJwtToken(user.Id, user.Username);
+            return Result.Ok(GenerateJwtToken(user.Id, user.Username));
         }
 
         private string GenerateJwtToken(int userId, string username)

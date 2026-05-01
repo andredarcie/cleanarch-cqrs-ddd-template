@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
 
 namespace DevEval.WebApi.Middleware
@@ -23,46 +23,15 @@ namespace DevEval.WebApi.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unhandled exception occurred.");
-
-                await HandleExceptionAsync(context, ex);
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new
+                {
+                    type = "InternalServerError",
+                    error = "Internal server error",
+                    detail = ex.Message
+                }));
             }
         }
-
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
-            var errorType = exception switch
-            {
-                KeyNotFoundException => "ResourceNotFound",
-                UnauthorizedAccessException => "AuthenticationError",
-                ArgumentException or ArgumentNullException => "ValidationError",
-                _ => "InternalServerError"
-            };
-
-            var response = new
-            {
-                type = errorType,
-                error = errorType switch
-                {
-                    "ResourceNotFound" => "Resource not found",
-                    "AuthenticationError" => "Authentication error",
-                    "ValidationError" => "Validation error",
-                    _ => "Internal server error"
-                },
-                detail = exception.Message
-            };
-
-            context.Response.StatusCode = errorType switch
-            {
-                "ResourceNotFound" => (int)HttpStatusCode.NotFound, // 404
-                "AuthenticationError" => (int)HttpStatusCode.Unauthorized, // 401
-                "ValidationError" => (int)HttpStatusCode.BadRequest, // 400
-                _ => (int)HttpStatusCode.InternalServerError // 500
-            };
-
-            context.Response.ContentType = "application/json";
-
-            return context.Response.WriteAsync(JsonSerializer.Serialize(response));
-        }
-
     }
 }

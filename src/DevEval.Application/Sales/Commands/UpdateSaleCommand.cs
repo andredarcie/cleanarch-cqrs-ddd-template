@@ -1,9 +1,10 @@
 ﻿using DevEval.Application.Sales.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Sales.Commands
 {
-    public class UpdateSaleCommand : IRequest<SaleDto>
+    public class UpdateSaleCommand : IRequest<Result<SaleDto>>
     {
         public Guid Id { get; set; }
         public required string SaleNumber { get; set; }

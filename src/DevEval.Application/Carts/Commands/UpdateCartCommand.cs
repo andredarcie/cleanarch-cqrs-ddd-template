@@ -1,9 +1,10 @@
 ﻿using DevEval.Application.Carts.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Carts.Commands
 {
-    public class UpdateCartCommand : IRequest<CartDto>
+    public class UpdateCartCommand : IRequest<Result<CartDto>>
     {
         /// <summary>
         /// The ID of the cart.

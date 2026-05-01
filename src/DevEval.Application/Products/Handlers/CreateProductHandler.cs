@@ -1,13 +1,14 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Products.Commands;
 using DevEval.Application.Products.Dtos;
 using DevEval.Domain.Entities.Product;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Products.Handlers
 {
-    public class CreateProductHandler : IRequestHandler<CreateProductCommand, ProductDto>
+    public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result<ProductDto>>
     {
         private readonly IProductRepository _repository;
         private readonly IMapper _mapper;
@@ -18,15 +19,11 @@ namespace DevEval.Application.Products.Handlers
             _mapper = mapper;
         }
 
-        public async Task<ProductDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+        public async Task<Result<ProductDto>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
             var product = _mapper.Map<Product>(request);
-
             var createdProduct = await _repository.AddAsync(product);
-
-            var result = _mapper.Map<ProductDto>(createdProduct);
-
-            return result;
+            return Result.Ok(_mapper.Map<ProductDto>(createdProduct));
         }
     }
 }

@@ -1,13 +1,15 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Carts.Commands;
 using DevEval.Application.Carts.Dtos;
+using DevEval.Application.Common.Errors;
 using DevEval.Domain.Entities.Cart;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Carts.Handlers
 {
-    public class CreateCartHandler : IRequestHandler<CreateCartCommand, CartDto>
+    public class CreateCartHandler : IRequestHandler<CreateCartCommand, Result<CartDto>>
     {
         private readonly ICartRepository _repository;
         private readonly IProductRepository _productRepository;
@@ -20,7 +22,7 @@ namespace DevEval.Application.Carts.Handlers
             _productRepository = productRepository;
         }
 
-        public async Task<CartDto> Handle(CreateCartCommand request, CancellationToken cancellationToken)
+        public async Task<Result<CartDto>> Handle(CreateCartCommand request, CancellationToken cancellationToken)
         {
             request.Date = DateTime.UtcNow;
 
@@ -31,13 +33,11 @@ namespace DevEval.Application.Carts.Handlers
                 var product = await _productRepository.GetByIdAsync(cartProduct.ProductId);
 
                 if (product == null)
-                {
-                    throw new ArgumentException($"Product with ID {cartProduct.Id} does not exist.", nameof(cartProduct.Id));
-                }
+                    return Result.Fail(new ValidationError($"Product with ID {cartProduct.ProductId} does not exist."));
             }
 
             var createdCart = await _repository.AddAsync(cart);
-            return _mapper.Map<CartDto>(createdCart);
+            return Result.Ok(_mapper.Map<CartDto>(createdCart));
         }
     }
 }

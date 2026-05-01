@@ -1,14 +1,15 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Users.Commands;
 using DevEval.Application.Users.Dtos;
 using DevEval.Common.Services;
 using DevEval.Domain.Entities.User;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Users.Handlers
 {
-    public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto>
+    public class CreateUserHandler : IRequestHandler<CreateUserCommand, Result<UserDto>>
     {
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
@@ -21,17 +22,14 @@ namespace DevEval.Application.Users.Handlers
             _passwordService = passwordService;
         }
 
-        public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             request.Password = _passwordService.HashPassword(request.Password);
 
             var user = _mapper.Map<User>(request);
-
             var createdUser = await _repository.AddAsync(user);
 
-            var result = _mapper.Map<UserDto>(createdUser);
-
-            return result;
+            return Result.Ok(_mapper.Map<UserDto>(createdUser));
         }
     }
 }

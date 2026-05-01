@@ -1,10 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 using DevEval.Application.Carts.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Carts.Commands
 {
-    public class CreateCartCommand : IRequest<CartDto>
+    public class CreateCartCommand : IRequest<Result<CartDto>>
     {
         /// <summary>
         /// The ID of the user who owns the cart.

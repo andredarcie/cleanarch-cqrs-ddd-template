@@ -1,9 +1,10 @@
 ﻿using DevEval.Application.Products.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Products.Commands
 {
-    public class CreateProductCommand : IRequest<ProductDto>
+    public class CreateProductCommand : IRequest<Result<ProductDto>>
     {
         /// <summary>
         /// Gets or sets the title of the product.

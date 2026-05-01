@@ -1,14 +1,15 @@
-﻿using AutoMapper;
+using AutoMapper;
 using DevEval.Application.Sales.Commands;
 using DevEval.Application.Sales.Dtos;
 using DevEval.Application.Sales.Services;
 using DevEval.Domain.Entities.Sale;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Sales.Handlers
 {
-    public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, SaleDto>
+    public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, Result<SaleDto>>
     {
         private readonly ISaleRepository _repository;
         private readonly IMapper _mapper;
@@ -21,17 +22,12 @@ namespace DevEval.Application.Sales.Handlers
             _eventPublisher = eventPublisher;
         }
 
-        public async Task<SaleDto> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
+        public async Task<Result<SaleDto>> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
         {
             var sale = _mapper.Map<Sale>(request);
-
             var createdSale = await _repository.AddAsync(sale);
-
             await _eventPublisher.PublishSaleCreatedAsync(createdSale);
-
-            var result = _mapper.Map<SaleDto>(createdSale);
-
-            return result;
+            return Result.Ok(_mapper.Map<SaleDto>(createdSale));
         }
     }
 }

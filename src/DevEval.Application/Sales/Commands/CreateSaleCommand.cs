@@ -1,9 +1,10 @@
 ﻿using DevEval.Application.Sales.Dtos;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Sales.Commands
 {
-    public class CreateSaleCommand : IRequest<SaleDto>
+    public class CreateSaleCommand : IRequest<Result<SaleDto>>
     {
         public required string SaleNumber { get; set; }
         public DateTime SaleDate { get; set; }

@@ -1,10 +1,11 @@
-﻿using DevEval.Application.Users.Commands;
+using DevEval.Application.Users.Commands;
 using DevEval.Domain.Repositories;
+using FluentResults;
 using MediatR;
 
 namespace DevEval.Application.Users.Handlers
 {
-    public class DeleteUserHandler : IRequestHandler<DeleteUserCommand>
+    public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Result>
     {
         private readonly IUserRepository _repository;
 
@@ -13,9 +14,10 @@ namespace DevEval.Application.Users.Handlers
             _repository = repository;
         }
 
-        public async Task Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
             await _repository.DeleteAsync(request.Id);
+            return Result.Ok();
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using Application.Users.Handlers;
+using Application.Users.Handlers;
 using DevEval.Application.Auth.Commands;
+using DevEval.Application.Common.Errors;
 using DevEval.Common.Services;
 using DevEval.Domain.Entities.User;
 using DevEval.Domain.Enums;
@@ -41,34 +42,36 @@ namespace DevEval.Test.Application.Auth.Handlers
             _passwordServiceMock.VerifyPassword(user.Password, command.Password).Returns(true);
 
             // Act
-            var token = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(token);
+            Assert.True(result.IsSuccess);
             var jwtHandler = new JwtSecurityTokenHandler();
-            Assert.True(jwtHandler.CanReadToken(token));
+            Assert.True(jwtHandler.CanReadToken(result.Value));
 
-            var jwtToken = jwtHandler.ReadJwtToken(token);
+            var jwtToken = jwtHandler.ReadJwtToken(result.Value);
             Assert.Contains(jwtToken.Claims, c => c.Type == "UserId" && c.Value == user.Id.ToString());
             Assert.Contains(jwtToken.Claims, c => c.Type == JwtRegisteredClaimNames.Sub && c.Value == user.Username);
         }
 
         [Fact]
-        public async Task Handle_InvalidCredentials_ShouldThrowUnauthorizedAccessException()
+        public async Task Handle_InvalidCredentials_ShouldReturnUnauthorizedError()
         {
             // Arrange
             var command = new LoginUserCommand("wronguser", "wrongpassword");
             _userRepositoryMock.GetByUsernameAsync(command.Username).Returns((User?)null);
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
 
-            Assert.Equal("Invalid username or password", exception.Message);
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<UnauthorizedError>(result.Errors.First());
+            Assert.Equal("Invalid username or password", result.Errors.First().Message);
         }
 
         [Fact]
-        public async Task Handle_WrongPassword_ShouldThrowUnauthorizedAccessException()
+        public async Task Handle_WrongPassword_ShouldReturnUnauthorizedError()
         {
             // Arrange
             var command = new LoginUserCommand("admin", "wrongpassword");
@@ -77,11 +80,13 @@ namespace DevEval.Test.Application.Auth.Handlers
             _userRepositoryMock.GetByUsernameAsync(command.Username).Returns(user);
             _passwordServiceMock.VerifyPassword(user.Password, command.Password).Returns(false);
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-                _handler.Handle(command, CancellationToken.None));
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
 
-            Assert.Equal("Invalid username or password", exception.Message);
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.IsType<UnauthorizedError>(result.Errors.First());
+            Assert.Equal("Invalid username or password", result.Errors.First().Message);
         }
     }
 }
