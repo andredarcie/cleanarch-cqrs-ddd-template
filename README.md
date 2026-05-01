@@ -15,22 +15,40 @@ making it easier to maintain, test, and extend.
 
 Setting up and running the project is simple. Just follow these steps.
 
-### 1️⃣ Start the Database
+### Option A — Docker Compose (recommended)
 
-First, run your database. You can do this in any way you prefer, but if you want a quick setup, you can use a **Docker container**:
+Spin up the API and database together with a single command:
 
 ```console
-docker run -d --name dev_eval_db --restart always -e POSTGRES_DB=DevEvalDb -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=yourpassword -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres:15
+docker compose up --build
 ```
 
-Make sure to update yourpassword with a secure password.
+The API will be available at `http://localhost:8080` and Swagger at `http://localhost:8080/`.
 
-### 2️⃣ Run the Project
+> **Note:** Update the passwords and JWT secret in `docker-compose.yml` before deploying to any non-local environment.
 
-Once the database is up and running, start the project with:
+### Option B — Run Locally
+
+#### 1️⃣ Start the Database
+
+Run PostgreSQL via Docker:
 
 ```console
-dotnet run
+docker run -d --name dev_eval_db --restart always \
+  -e POSTGRES_DB=DevEvalDb \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=yourpassword \
+  -p 5432:5432 \
+  -v postgres_data:/var/lib/postgresql/data \
+  postgres:15
+```
+
+#### 2️⃣ Run the Project
+
+Once the database is up, start the API with:
+
+```console
+dotnet run --project src/DevEval.WebApi
 ```
 
 This will automatically open **Swagger**, where you can explore the API documentation.
@@ -81,20 +99,10 @@ The project includes a variety of automated tests to ensure the quality, reliabi
 
 To ensure the application works as expected, you can run the automated tests. Follow these steps:
 
-### 1️⃣ Navigate to the Test Project
-
-Go to the test directory:
+Run the tests from the project root:
 
 ```console
-cd test/DevEval.Test
-```
-
-### 2️⃣ Execute the Tests
-
-Run the tests using the following command:
-
-```console
-dotnet test
+dotnet test test/DevEval.Test
 ```
 
 ### ✅ Done!
@@ -139,7 +147,8 @@ The project follows a modular approach inspired by **Domain-Driven Design (DDD)*
   - **Configuration Files**:
     - `appsettings.json` and `appsettings.Development.json` for managing environment-specific settings.
   - **Deployment**:
-    - `Dockerfile` and `docker-compose.yml` to facilitate containerized deployments.
+    - `Dockerfile`: multi-stage build producing a lean runtime image.
+    - `docker-compose.yml` (project root): orchestrates the API and PostgreSQL together, with health checks and automatic dependency ordering.
 
 - **test/DevEval.Test**  
   Implements automated tests to ensure application quality and robustness:

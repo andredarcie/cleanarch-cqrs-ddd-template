@@ -1,0 +1,39 @@
+services:
+  database:
+    image: postgres:15
+    container_name: dev_eval_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: DevEvalDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d DevEvalDb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/DevEval.WebApi/Dockerfile
+    container_name: dev_eval_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__PostgreSqlConnection: "Host=database;Port=5432;Database=DevEvalDb;Username=postgres;Password=yourpassword"
+      Jwt__Key: "YourSuperSecretKeyThatIsLongEnough123!"
+      Jwt__Issuer: "YourAppIssuer"
+      Jwt__Audience: "YourAppAudience"
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

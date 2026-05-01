@@ -11,7 +11,8 @@ namespace DevEval.Application.Carts.Validators
                 .GreaterThan(0).WithMessage("Product ID must be greater than zero.");
 
             RuleFor(product => product.Quantity)
-                .GreaterThan(0).WithMessage("Product quantity must be greater than zero.");
+                .GreaterThan(0).WithMessage("Product quantity must be greater than zero.")
+                .LessThanOrEqualTo(20).WithMessage("Product quantity cannot exceed 20.");
         }
     }
 }
