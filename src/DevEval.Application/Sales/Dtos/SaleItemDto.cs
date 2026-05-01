@@ -6,6 +6,6 @@
         public required int Quantity { get; set; }
         public required decimal UnitPrice { get; set; }
         public required decimal Discount { get; set; }
-        public required decimal TotalPrice { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }

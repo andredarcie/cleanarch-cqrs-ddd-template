@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
     <ProjectReference Include="..\DevEval.Application\DevEval.Application.csproj" />
     <ProjectReference Include="..\DevEval.ORM\DevEval.ORM.csproj" />
   </ItemGroup>

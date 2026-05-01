@@ -13,7 +13,7 @@ namespace DevEval.Application.Sales.Validators
 
             RuleFor(command => command.SaleDate)
                 .NotEmpty().WithMessage("Sale date is required.")
-                .LessThanOrEqualTo(DateTime.Now).WithMessage("Sale date cannot be in the future.");
+                .LessThanOrEqualTo(_ => DateTime.UtcNow).WithMessage("Sale date cannot be in the future.");
 
             RuleFor(command => command.CustomerId)
                 .NotEmpty().WithMessage("Customer ID is required.");

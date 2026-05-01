@@ -17,21 +17,22 @@ Setting up and running the project is simple. Just follow these steps.
 
 ### Option A — Docker Compose (recommended)
 
-Spin up the API and database together with a single command:
+Spin up the API, PostgreSQL, and Kafka together with a single command:
 
 ```console
 docker compose up --build
 ```
 
 The API will be available at `http://localhost:8080` and Swagger at `http://localhost:8080/`.
+Kafka will be exposed for local development at `localhost:9094`.
 
 > **Note:** Update the passwords and JWT secret in `docker-compose.yml` before deploying to any non-local environment.
 
 ### Option B — Run Locally
 
-#### 1️⃣ Start the Database
+#### 1️⃣ Start the Infrastructure
 
-Run PostgreSQL via Docker:
+Run PostgreSQL:
 
 ```console
 docker run -d --name dev_eval_db --restart always \
@@ -43,15 +44,38 @@ docker run -d --name dev_eval_db --restart always \
   postgres:15
 ```
 
+Run Kafka:
+
+```console
+docker run -d --name dev_eval_kafka --restart always \
+  -p 9094:9094 \
+  -e KAFKA_CFG_NODE_ID=0 \
+  -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
+  -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@localhost:9093 \
+  -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094 \
+  -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,EXTERNAL://localhost:9094 \
+  -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT \
+  -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+  -e KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
+  -e KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true \
+  -e KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+  -e KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 \
+  -e KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1 \
+  -e KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk \
+  -e ALLOW_PLAINTEXT_LISTENER=yes \
+  bitnami/kafka:3.8
+```
+
 #### 2️⃣ Run the Project
 
-Once the database is up, start the API with:
+Once PostgreSQL and Kafka are up, start the API with:
 
 ```console
 dotnet run --project src/DevEval.WebApi
 ```
 
 This will automatically open **Swagger**, where you can explore the API documentation.
+When running locally, `SaleCreated` events will be published to Kafka topic `sales.created` on `localhost:9094`.
 
 ### 3️⃣ Authenticate
 

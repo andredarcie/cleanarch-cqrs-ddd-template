@@ -1,28 +1,26 @@
-﻿using Rebus.Bus;
 using DevEval.Application.Sales.Events;
 using DevEval.Domain.Entities.Sale;
+using Rebus.Bus;
 
 namespace DevEval.Application.Sales.Services
 {
     public class SaleEventPublisher : ISaleEventPublisher
     {
         private readonly IBus _bus;
+        private readonly ISaleCreatedEventProducer _saleCreatedEventProducer;
 
-        public SaleEventPublisher(IBus bus)
+        public SaleEventPublisher(IBus bus, ISaleCreatedEventProducer saleCreatedEventProducer)
         {
             _bus = bus;
+            _saleCreatedEventProducer = saleCreatedEventProducer;
         }
 
         public async Task PublishSaleCreatedAsync(Sale sale)
         {
-            var saleCreatedEvent = new SaleCreatedEvent
-            {
-                SaleId = sale.Id,
-                SaleDate = sale.SaleDate,
-                TotalAmount = sale.TotalAmount
-            };
+            var saleCreatedEvent = CreateSaleCreatedEvent(sale);
 
             await _bus.Publish(saleCreatedEvent);
+            await _saleCreatedEventProducer.PublishAsync(saleCreatedEvent);
         }
 
         public async Task PublishSaleModifiedAsync(Sale sale)
@@ -58,6 +56,23 @@ namespace DevEval.Application.Sales.Services
             };
 
             await _bus.Publish(itemCancelledEvent);
+        }
+
+        private static SaleCreatedEvent CreateSaleCreatedEvent(Sale sale)
+        {
+            return new SaleCreatedEvent
+            {
+                SaleId = sale.Id,
+                SaleNumber = sale.SaleNumber,
+                SaleDate = sale.SaleDate,
+                CustomerId = sale.CustomerId,
+                CustomerName = sale.CustomerName,
+                BranchId = sale.BranchId,
+                BranchName = sale.BranchName,
+                TotalAmount = sale.TotalAmount,
+                IsCancelled = sale.IsCancelled,
+                ItemsCount = sale.Items.Count
+            };
         }
     }
 }

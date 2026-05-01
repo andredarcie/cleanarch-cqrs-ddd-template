@@ -1,13 +1,17 @@
+using DevEval.Application.Sales.Services;
 using DevEval.WebApi;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DevEval.IntegrationTests.Infrastructure;
 
 public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly TestApiSettings _settings;
+
+    public FakeSaleCreatedEventProducer FakeSaleCreatedEventProducer { get; } = new();
 
     public CustomWebApplicationFactory(TestApiSettings settings)
     {
@@ -30,6 +34,10 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:Issuer"] = _settings.JwtIssuer,
                 ["Jwt:Audience"] = _settings.JwtAudience
             });
+        });
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<ISaleCreatedEventProducer>(FakeSaleCreatedEventProducer);
         });
     }
 

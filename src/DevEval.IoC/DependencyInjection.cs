@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using DevEval.Domain.Repositories;
-using DevEval.ORM.Repositories;
 using DevEval.Application.Sales.Services;
 using DevEval.Common.Services;
+using DevEval.Domain.Repositories;
+using DevEval.IoC.Kafka;
+using DevEval.ORM.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DevEval.IoC
 {
@@ -16,6 +17,7 @@ namespace DevEval.IoC
             services.AddScoped<ISaleRepository, SaleRepository>();
 
             services.AddSingleton<IPasswordService, PasswordService>();
+            services.AddSingleton<ISaleCreatedEventProducer, KafkaSaleCreatedEventProducer>();
             services.AddScoped<ISaleEventPublisher, SaleEventPublisher>();
 
             return services;
