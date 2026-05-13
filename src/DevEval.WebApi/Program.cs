@@ -164,6 +164,7 @@ namespace DevEval.WebApi
                 Console.WriteLine("Database migration applied successfully.");
 
                 await AdminUserInitializer.EnsureAdminUserExists(app.Services);
+                await ProductSeeder.EnsureProductsExist(app.Services);
             }
             catch (Exception ex)
             {
